@@ -3,17 +3,17 @@ from parsimonious.nodes import NodeVisitor
 
 grammar = Grammar(
     """
-    schema            = emptyline* def*
+    schema            = wsc? "schema" wsc? lbrace wsc? def* rbrace wsc?
     
     # Schema Definition Language
-    def               = (type_def)
+    def               = type_def
     type_def          = kw_type wsc identifier wsc? lbrace wsc? field_def* rbrace wsc?
     
     # Definition of a field in a type.  Format examples:
     #
     #   temperature: Float
     #   temperature: Float @f(a: 1, b: { field1 { field2 }})
-    #   temperature(offset: Float = 0, scale: Float): Float
+    #   temperature(offset: Float = 0, scale: String = "f"): Float
     #
     field_def         = field_name wsc? (lparen wsc? field_arg_list wsc? rparen)? wsc? colon wsc? 
                         (scalar_type / array_type) wsc? declaration? wsc?
@@ -38,11 +38,10 @@ grammar = Grammar(
     identifier        = ~"[A-Z_][A-Z_0-9]*"i
     constant          = literal_string / literal_number
     literal_number    = ~"[0-9]+([.][0-9]+)?"
-    literal_string    = dquote text_no_quote dquote
-    text              = ~"[A-Za-z0-9 _]*"i
-    # Match everything except quote and newline
-    text_no_quote     = ~"[^\\"\\n]*"i
-    # We need two backslashes here since we are in a tripple quote.  It
+    # Match everything except quote and newline.  We need two backslashes so
+    # that one gets fed into the library.
+    literal_string    = dquote ~"[^\\"\\n]*"i dquote
+    # We need two backslashes here since we are in a triple quote.  It
     # is important that the backslash get passed into the library.
     dquote            = "\\u0022"
     kw_type           = "type"
@@ -58,27 +57,32 @@ grammar = Grammar(
     colon             = ":"
     
     # Whitespace of arbitrary length
-    ws                = ~"\s*"
+    ws                = ~"[ \\t\\n]"
     # A comment that starts with a pound and goes to the end of the line
     comment           = ~"#.*$"m
     # This is a kind of whitespace that includes comments
-    wsc               = (comment / ws)*
+    wsc               = (ws / comment)*
 
     emptyline         = wsc+
     """)
 
-test_document = """
-# Test comment
-type Instrument { 
-  id: ID!
-  # Useful comment
-  name: String @derrived(a: 5, b: "henry!", c: 6 ,d : { test { a b } })
-  list: [Float!]
-  list1(env: MarketEnv): [Float!]
-  list2(env1: MarketEnv = 66, env2: MarketEnv = "test%4"): [Float!]
-}
-type Position {
-  id: ID
+test_document = """ 
+# A test schema
+schema {
+    type Instrument { 
+      id: ID!
+      # A comment between fields.  Also demonstrating that the declaration 
+      # can be split across lines
+      name: String @derrived(a: 5, b: "henry!", 
+        c: 6 ,d : { test { a b } })
+      list: [Float!]
+      list1(env: MarketEnv): [Float!]
+      list2(env1: MarketEnv = 66, env2: MarketEnv = "test%4"): [Float!]
+    }
+    # A comment between types
+    type Position {
+      id: ID!
+    }
 }
 """
 
