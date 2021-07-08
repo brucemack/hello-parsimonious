@@ -1,5 +1,5 @@
 from parsimonious.grammar import Grammar
-from parsimonious.nodes import NodeVisitor
+from SchemaTreeVisitor import SchemaTreeVisitor
 
 grammar = Grammar(
     """
@@ -61,10 +61,10 @@ grammar = Grammar(
     literal_number    = ~"[0-9]+([.][0-9]+)?"
     # Match everything except quote and newline.  We need two backslashes so
     # that one gets fed into the library.
-    literal_string    = dquote ~"[^\\"\\n]*"i dquote
+    literal_string    = DQUOTE ~"[^\\"\\n]*"i DQUOTE
     # We need two backslashes here since we are in a triple quote.  It
     # is important that the backslash get passed into the library.
-    dquote            = "\\u0022"
+    DQUOTE            = "\\u0022"
     KW_TYPE           = "type"
     KW_ENUM           = "enum"
     KW_UNION          = "union"
@@ -122,66 +122,6 @@ schema {
 
 print(grammar.parse(test_document))
 
-
-# Demonstrate visitation
-class Visitor(NodeVisitor):
-
-    def visit_type_def(self, node, visited_children):
-        _, _, id, *_ = visited_children
-        print("visit_type_def", id.text)
-        return None
-
-    def visit_field_def(self, node, visited_children):
-        id, *_ = visited_children
-        print("visit_field_def", id.text)
-        return None
-
-    def visit_declaration(self, node, visited_children):
-        _, id, *_ = visited_children
-        print("visit_declaration", id.text)
-        return None
-
-    def visit_comment(self, node, visited_children):
-        print("visit_comment")
-        return None
-
-    def visit_param(self, node, visited_children):
-        id, *_ = visited_children
-        print("visit_param", id.text)
-        return None
-
-    def visit_field_name(self, node, visited_children):
-        print("visit_field_name")
-        return visited_children or node
-
-    def visit_type_name(self, node, visited_children):
-        print("visit_type_name")
-        return visited_children or node
-
-    def visit_identifier(self, node, visited_children):
-        print("visit_identifier")
-        return visited_children or node
-
-    def visit_literal_string(self, node, visited_children):
-        print("visit_literal_string", node.text)
-        return visited_children or node
-
-    def visit_literal_number(self, node, visited_children):
-        print("visit_literal_number", node.text)
-        return None
-
-    def visit_query(self, node, visited_children):
-        print("visit_query")
-        return None
-
-    def visit_field_arg(self, node, visited_children):
-        print("visit_field_arg")
-        return None
-
-
-    def generic_visit(self, node, visited_children):
-        return visited_children or node
-
 tree = grammar.parse(test_document)
-v = Visitor()
+v = SchemaTreeVisitor()
 v.visit(tree)
