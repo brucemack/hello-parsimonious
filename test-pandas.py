@@ -1,11 +1,11 @@
 # . dev/bin/activate
+# python3 -m pip install --upgrade pip
 # pip install pandas
 
 import unittest
 import pandas as pd
 import math
 import numpy as np
- 
  
 class Tests(unittest.TestCase):
 
@@ -14,6 +14,7 @@ class Tests(unittest.TestCase):
         obj = obj[obj >= 5]
         self.assertEqual(2, obj.size)
 
+
     def test_sum(self):
         # Take two series with common index values and join them
         s1 = pd.Series([1, 2], index=['A', 'B'], name='s1')
@@ -21,6 +22,16 @@ class Tests(unittest.TestCase):
         s3 = pd.concat([s1, s2], axis=1)
         self.assertEqual(3, s3["s1"].sum())
         
+    def test_sort(self):
+        # Take two series with common index values and join them
+        s1 = pd.Series([1, 2], index=['A', 'B'], name='s1')
+        s2 = pd.Series([3, 4], index=['A', 'B'], name='s2')
+        s3 = pd.concat([s1, s2], axis=1)
+        # Demonstrate that the rows in a DF have an order that is 
+        # independent of the index values.
+        s4 = s3.sort_values(by="s2", ascending=False)
+        self.assertEqual(2, s4["s1"][0])
+        self.assertEqual(1, s4["s1"][1])
 
     def test_join(self):
         # Take two series with common index values and join them
@@ -207,5 +218,46 @@ class Tests(unittest.TestCase):
         # Show quantiles
         #print(pd.qcut(df1['s0'], 2, labels=False))
   
+    def test_group_1(self):
+        # Demonstrate grouping by a column
+
+        # Build an index
+        dti = [ 1001, 1002, 1003 ]
+        # Dictionary of equal-length lists
+        data = {
+            "country": [ "us", "us", "ca" ],
+            "s0": [4, 5, 10],
+            "s1": [6, 2, 1]
+        }
+        df1 = pd.DataFrame(data, index=dti)
+        # Group by.  IMPORTANT: This doesn't return a DataFrame
+        # but instead, an object that explains the grouping.
+        g = df1.groupby(by="country")
+        # This is a reduce operation that creates a dataframe
+        g = g.sum()
+        self.assertEqual(9, g["s0"]["us"])
+
+
+    def test_group_2(self):
+        # Demonstrate grouping by a column
+
+        # Build an index
+        dti = [ 1001, 1002, 1003, 1004 ]
+        # Dictionary of equal-length lists
+        data = {
+            "country": [ "us", "us", "us", "ca" ],
+            "sector": [ "tech", "tech", "health", "financial" ],
+            "s0": [4, 1, 5, 10],
+            "s1": [6, 2, 2, 1]
+        }
+        df1 = pd.DataFrame(data, index=dti)
+        # Group by.  IMPORTANT: This doesn't return a DataFraame
+        # but instead, an object that explains the grouping.
+        g = df1.groupby(by=["country", "sector"])
+        # This is a reduce operation that creates a DataFrame:
+        # The resulting DataFrame has a multi-level index
+        g = g.sum()
+        self.assertEqual(3, g["s0"].size)
+ 
 if __name__ == '__main__':
     unittest.main()
