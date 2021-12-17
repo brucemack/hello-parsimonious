@@ -14,6 +14,14 @@ class Tests(unittest.TestCase):
         obj = obj[obj >= 5]
         self.assertEqual(2, obj.size)
 
+    def test_sum(self):
+        # Take two series with common index values and join them
+        s1 = pd.Series([1, 2], index=['A', 'B'], name='s1')
+        s2 = pd.Series([3, 4], index=['A', 'B'], name='s2')
+        s3 = pd.concat([s1, s2], axis=1)
+        self.assertEqual(3, s3["s1"].sum())
+        
+
     def test_join(self):
         # Take two series with common index values and join them
         s1 = pd.Series([1, 2], index=['A', 'B'], name='s1')
