@@ -278,6 +278,24 @@ class Tests(unittest.TestCase):
         # Demonstrate the addition of a computed column
         df3 = df2.assign(riskAdjustedReturn = df2.s0 / df2.s1)
 
+    def test_report_1(self):
+        # Dictionary of equal-length lists
+        data = {
+            "secId": [ 1001, 1002, 1003, 1004 ],
+            "country": [ "us", "us", "us", "ca" ],
+            "sector": [ "tech", "tech", "health", "financial" ],
+            "return1d": [4, 1, 5, -10],
+            "risk": [6, 2, 2, 1]
+        }
+        df1 = pd.DataFrame(data)
+        df2 = df1.assign(riskAdjustedReturn = df1.return1d / df1.risk)
+        print(df2)
+        # Here is where we filter out evertyhing with a risk-adjusted return >= 1.0
+        #df2 = df1[abs(df1["s0"] / df1["s1"]) >= 1.0]
+        #self.assertEqual(2, df2.index.size)
+
+        # Demonstrate the addition of a computed column
+
 
 if __name__ == '__main__':
     unittest.main()
