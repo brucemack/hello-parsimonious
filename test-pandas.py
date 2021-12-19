@@ -258,6 +258,16 @@ class Tests(unittest.TestCase):
         # The resulting DataFrame has a multi-level index
         g = g.sum()
         self.assertEqual(3, g["s0"].size)
- 
+
+        # What happens when we reduce a non-number?
+        g = df1.groupby(by=["country"])
+        # This is a reduce operation that creates a DataFrame:
+        # The resulting DataFrame has a single-level index.
+        # It looks like the sector series was ignored since it 
+        # can't be summed
+        g = g.agg()
+        print(g)
+
+
 if __name__ == '__main__':
     unittest.main()
