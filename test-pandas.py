@@ -1,6 +1,7 @@
 # . dev/bin/activate
 # python3 -m pip install --upgrade pip
 # pip install pandas
+# Test
 
 import unittest
 import pandas as pd
@@ -20,7 +21,8 @@ class Tests(unittest.TestCase):
         s1 = pd.Series([1, 2], index=['A', 'B'], name='s1')
         s2 = pd.Series([3, 4], index=['A', 'B'], name='s2')
         s3 = pd.concat([s1, s2], axis=1)
-        self.assertEqual(3, s3["s1"].sum())
+        # Notice that we are using the . notation to reference  a column
+        self.assertEqual(3, s3.s1.sum())
         
     def test_sort(self):
         # Take two series with common index values and join them
@@ -30,8 +32,8 @@ class Tests(unittest.TestCase):
         # Demonstrate that the rows in a DF have an order that is 
         # independent of the index values.
         s4 = s3.sort_values(by="s2", ascending=False)
-        self.assertEqual(2, s4["s1"][0])
-        self.assertEqual(1, s4["s1"][1])
+        self.assertEqual(2, s4.s1[0])
+        self.assertEqual(1, s4.s1[1])
 
     def test_join(self):
         # Take two series with common index values and join them
@@ -259,14 +261,41 @@ class Tests(unittest.TestCase):
         g = g.sum()
         self.assertEqual(3, g["s0"].size)
 
-        # What happens when we reduce a non-number?
-        g = df1.groupby(by=["country"])
-        # This is a reduce operation that creates a DataFrame:
-        # The resulting DataFrame has a single-level index.
-        # It looks like the sector series was ignored since it 
-        # can't be summed
-        g = g.agg()
-        print(g)
+    def test_filter_2(self):
+        # Build an index
+        dti = [ 1001, 1002, 1003, 1004 ]
+        # Dictionary of equal-length lists
+        data = {
+            "country": [ "us", "us", "us", "ca" ],
+            "sector": [ "tech", "tech", "health", "financial" ],
+            "s0": [4, 1, 5, -10],
+            "s1": [6, 2, 2, 1]
+        }
+        df1 = pd.DataFrame(data, index=dti)
+        # Here is where we filter out evertyhing with a risk-adjusted return >= 1.0
+        df2 = df1[abs(df1["s0"] / df1["s1"]) >= 1.0]
+        self.assertEqual(2, df2.index.size)
+
+        # Demonstrate the addition of a computed column
+        df3 = df2.assign(riskAdjustedReturn = df2.s0 / df2.s1)
+
+    def test_report_1(self):
+        # Dictionary of equal-length lists
+        data = {
+            "secId": [ 1001, 1002, 1003, 1004 ],
+            "country": [ "us", "us", "us", "ca" ],
+            "sector": [ "tech", "tech", "health", "financial" ],
+            "return1d": [4, 1, 5, -10],
+            "risk": [6, 2, 2, 1]
+        }
+        df1 = pd.DataFrame(data)
+        df2 = df1.assign(riskAdjustedReturn = df1.return1d / df1.risk)
+        print(df2)
+        # Here is where we filter out evertyhing with a risk-adjusted return >= 1.0
+        #df2 = df1[abs(df1["s0"] / df1["s1"]) >= 1.0]
+        #self.assertEqual(2, df2.index.size)
+
+        # Demonstrate the addition of a computed column
 
 
 if __name__ == '__main__':
