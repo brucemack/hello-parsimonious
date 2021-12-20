@@ -289,13 +289,14 @@ class Tests(unittest.TestCase):
             "risk": [6, 2, 2, 1]
         }
         df1 = pd.DataFrame(data)
-        df2 = df1.assign(riskAdjustedReturn = df1.return1d / df1.risk)
-        print(df2)
-        # Here is where we filter out evertyhing with a risk-adjusted return >= 1.0
-        #df2 = df1[abs(df1["s0"] / df1["s1"]) >= 1.0]
-        #self.assertEqual(2, df2.index.size)
-
         # Demonstrate the addition of a computed column
+        df2 = df1.assign(riskAdjustedReturn = abs(df1.return1d / df1.risk))
+        df3 = df2[df2.riskAdjustedReturn >= 1.0]
+        df4 = df3.sort_values(by="riskAdjustedReturn", ascending=False)
+
+        # Iterate across df4
+        for r in df4.to_dict(orient='records'):
+            print(r)
 
 
 if __name__ == '__main__':
