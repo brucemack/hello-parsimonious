@@ -1,7 +1,6 @@
 # . dev/bin/activate
 # python3 -m pip install --upgrade pip
-# pip install pandas
-# Test
+# pip install -r requirements.txt
 
 import unittest
 import pandas as pd
