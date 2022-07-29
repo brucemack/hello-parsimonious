@@ -295,9 +295,17 @@ class Tests(unittest.TestCase):
         df4 = df3.sort_values(by="riskAdjustedReturn", ascending=False)
 
         # Iterate across df4
-        for r in df4.to_dict(orient='records'):
-            print(r)
+        #for r in df4.to_dict(orient='records'):
 
+    def test_map_1(self):
+
+        l = [
+            ( "a1", "b1"),
+            ( "a2", "b2")
+        ]
+        print(l)
+
+        d = { }
 
 if __name__ == '__main__':
     unittest.main()
